@@ -88,7 +88,7 @@ class RdiVcs:
         if local_branch:
             print(f'Branch "{branch}" exists locally in {name}. Checking out.')
             repo_obj.checkout(local_branch.name)
-            print(f'{name} is now at {local_branch.name}')
+            print(f'{name} is now at {branch}')
             return
 
         # check if remote branch exists
@@ -100,7 +100,7 @@ class RdiVcs:
             new_branch = repo_obj.braches.create(branch, commit)
             new_branch.upstream = remote_branch_name
             repo_obj.checkout(new_branch.name)
-            print(f'{name} is now at {local_branch.name}')
+            print(f'{name} is now at {branch}')
             return
 
         # if both absent
@@ -108,7 +108,7 @@ class RdiVcs:
         head_commit = repo_obj.head.peel(pygit2.Commit)
         new_branch = repo_obj.branches.create(branch, head_commit)
         repo_obj.checkout(new_branch.name)
-        print(f'{name} is now at {local_branch.name}')
+        print(f'{name} is now at {branch}')
 
     def checkout_create_all(self, branch):
         threads = []
