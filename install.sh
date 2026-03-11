@@ -12,7 +12,7 @@ else if [ $(echo $SHELL) = "/usr/bin/zsh" ]; then
     echo ""
 
 else
-    echo "unsupported shell"
+    echo "unsupported shell: $SHELL"
     exit 1
 fi
 fi
@@ -34,14 +34,22 @@ conda deactivate  # base env
 
 ln -s $PWD/rdi-vcs.sh ~/.local/rdi-vcs
 
-cp ~/.zshrc ~/.zshrc.pre-rdi-vcs
+if [ $(echo $SHELL) = "/usr/bin/bash" ]; then
+    cp ~/.bashrc ~/.bashrc.pre-rdi-vcs
+    SHRC=".bashrc"
+
+else if [ $(echo $SHELL) = "/usr/bin/zsh" ]; then
+    cp ~/.zshrc ~/.zshrc.pre-rdi-vcs
+    SHRC=".zshrc"
+fi
+fi
 
 echo "export RDI_VCS_INSTALLATION=$PWD" > ~/.env.sh
 
 echo ""
 echo "====================================================="
 echo "rdi-vcs installed. reload the shell to apply changes."
-echo "current .zshrc saved to .zshrc.pre-rdi-vcs"
+echo "current $SHRC saved to $SHRC.pre-rdi-vcs"
 echo "====================================================="
 
 
