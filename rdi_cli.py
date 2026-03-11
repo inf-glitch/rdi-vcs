@@ -3,12 +3,12 @@ from rdi_vcs import RdiVcs
 import argparse
 import vcstool
 import pygit2  # temp
+import setuptools
 
 
 print(argparse.__version__)
 print(pygit2.__version__)
-print(vcstool.__version__)
-
+print(setuptools.__version__)
 
 def main():
     rdi_vcs = RdiVcs('meta_repo/repos.yaml')
@@ -35,7 +35,7 @@ def main():
             rdi_vcs.checkout_create_all(args.branch)
 
         case "push":
-            rdi_vcs.push()
+            rdi_vcs.push_all()
 
         case "pull":
             rdi_vcs.pull()

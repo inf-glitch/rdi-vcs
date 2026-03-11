@@ -29,6 +29,7 @@ bash Miniforge3-$(uname)-$(uname -m).sh -b -p $PWD/miniforge3
 conda create -n rdi-vcs python=3.12 -y
 conda activate rdi-vcs
 pip install vcstool pygit2 argparse
+pip install "setuptools==80"
 conda deactivate  # rdi-vcs env
 conda deactivate  # base env
 
