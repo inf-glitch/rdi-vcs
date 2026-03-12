@@ -186,6 +186,8 @@ class RdiVcs:
             )
             if result.returncode == 0:
                 print(f'Pulled {name} successfully')
+                if result.stdout:
+                    print(result.stdout)
             else:
                 print(f'Pull failed for {name} (exit code {result.returncode})')
                 if result.stderr:
