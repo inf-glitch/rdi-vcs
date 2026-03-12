@@ -168,12 +168,46 @@ class RdiVcs:
         for thread in threads:
             thread.join()
 
-    def pull(self):
-        print('pull command plug')
-        return
-    
+    def pull(self, repo):
+        name = repo['name']
+        repo_path = os.path.abspath(name)
+
+        if not os.path.exists(repo_path):
+            print(f'Repository {name} not found at {repo_path}. Cannot pull.')
+            return
+
+        try:
+            result = subprocess.run(
+                ['git', 'pull'],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            if result.returncode == 0:
+                print(f'Pulled {name} successfully')
+            else:
+                print(f'Pull failed for {name} (exit code {result.returncode})')
+                if result.stderr:
+                    print(result.stderr)
+                elif result.stdout:
+                    print(result.stdout)
+
+        except subprocess.TimoutExpired:
+            print(f'Pull timed out for {name}')
+
+        except Exception as e:
+            print(f'Error pulling {name}: {e}')
+
     def pull_all(self):
-        return
+        threads = []
+        for repo in self.repos_data['repos']:
+            thread = Thread(target=self.pull, args=(repo,))
+            thread.start()
+            threads.append(thread)
+
+        for thread in threads:
+            thread.join()
 
     def publish(self):
         print('publish command plug')

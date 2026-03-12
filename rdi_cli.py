@@ -38,7 +38,7 @@ def main():
             rdi_vcs.push_all()
 
         case "pull":
-            rdi_vcs.pull()
+            rdi_vcs.pull_all()
 
         case "publish":
             rdi_vcs.publish()
