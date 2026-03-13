@@ -41,7 +41,7 @@ def main():
             rdi_vcs.pull_all()
 
         case "publish":
-            rdi_vcs.publish()
+            rdi_vcs.publish_all()
 
 
 if __name__ == '__main__':
