@@ -30,7 +30,7 @@ conda create -n rdi-vcs python=3.12 -y
 conda activate rdi-vcs
 
 pip install vcstool pygit2 argparse
-pip install "setuptools==80"
+pip install "setuptools==80"  # pkg_resources break on newer versions
 pip install requests
 
 conda deactivate  # rdi-vcs env

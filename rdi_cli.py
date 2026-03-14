@@ -12,6 +12,7 @@ print(setuptools.__version__)
 
 def main():
     rdi_vcs = RdiVcs('meta_repo/repos.yaml')
+    # TODO: add meta-repo path as optional arg
 
     parser = argparse.ArgumentParser(
         description="rdi-vcs tool - manage multiple repositories"
@@ -29,19 +30,19 @@ def main():
 
     match args.command:
         case "clone":
-            rdi_vcs.clone_all()
+            rdi_vcs.execute_threads(rdi_vcs.clone)
 
         case "checkout-create":
-            rdi_vcs.checkout_create_all(args.branch)
+            rdi_vcs.execute_threads(rdi_vcs.checkout_create, args.branch)
 
         case "push":
-            rdi_vcs.push_all()
+            rdi_vcs.execute_threads(rdi_vcs.push)
 
         case "pull":
-            rdi_vcs.pull_all()
+            rdi_vcs.execute_threads(rdi_vcs.pull)
 
         case "publish":
-            rdi_vcs.publish_all()
+            rdi_vcs.execute_threads(rdi_vcs.publish)
 
 
 if __name__ == '__main__':

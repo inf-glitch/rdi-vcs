@@ -53,6 +53,7 @@ class RdiVcs:
         
         with open(repos_config, 'r') as f:
             self.repos_data = yaml.safe_load(f)
+
     def clone(self, repo):
         name = repo['name']    
         url = repo['url']
@@ -69,18 +70,6 @@ class RdiVcs:
             print(f'Done cloning {name}')
         except Exception as e:
             print(f'Error cloning {name}: {e}')
-
-    # TODO: unify the _all_ method for all commands
-    def clone_all(self):
-        threads = []
-
-        for repo in self.repos_data['repos']:
-            thread = Thread(target=self.clone, args=(repo,))
-            thread.start()
-            threads.append(thread)
-
-        for thread in threads:
-            thread.join()
 
     def checkout_create(self, repo, branch):
         name = repo['name']
@@ -128,17 +117,6 @@ class RdiVcs:
         repo_obj.checkout(new_branch.name)
         print(f'{name} is now at {branch}')
 
-    def checkout_create_all(self, branch):
-        threads = []
-
-        for repo in self.repos_data['repos']:
-            thread = Thread(target=self.checkout_create, args=(repo, branch))
-            thread.start()
-            threads.append(thread)
-
-        for thread in threads:
-            thread.join()
-
     def push(self, repo):
         name = repo['name']
         vcs_type = repo['type'] 
@@ -161,6 +139,8 @@ class RdiVcs:
             )
             if result.returncode == 0:
                 print(f'Pushed {name} successfully')
+                if result.stdout:
+                    print(result.stdout)
             else:
                 print(f'Push failed for {name} (exit code {result.returncode})')
                 if result.stderr:
@@ -173,16 +153,6 @@ class RdiVcs:
 
         except Exception as e:
             print(f'Error pushing {name}: {e}')
-
-    def push_all(self):
-        threads = []
-        for repo in self.repos_data['repos']:
-            thread = Thread(target=self.push, args=(repo,))
-            thread.start()
-            threads.append(thread)
-
-        for thread in threads:
-            thread.join()
 
     def pull(self, repo):
         name = repo['name']
@@ -215,16 +185,6 @@ class RdiVcs:
 
         except Exception as e:
             print(f'Error pulling {name}: {e}')
-
-    def pull_all(self):
-        threads = []
-        for repo in self.repos_data['repos']:
-            thread = Thread(target=self.pull, args=(repo,))
-            thread.start()
-            threads.append(thread)
-
-        for thread in threads:
-            thread.join()
 
     def publish(self, repo):
         name = repo['name']
@@ -291,13 +251,22 @@ class RdiVcs:
         except Exception as e:
             print(f'Error publishing {name}: {e}')
 
-    def publish_all(self):
+    def execute_threads(self, *args):
+        target = args[0]
         threads = []
 
-        for repo in self.repos_data['repos']:
-            thread = Thread(target=self.publish, args=(repo,))
-            thread.start()
-            threads.append(thread)
+        if len(args) == 2:
+            branch = args[1]
+            for repo in self.repos_data['repos']:
+                thread = Thread(target=target, args=(repo, branch))
+                thread.start()
+                threads.append(thread)
+
+        elif len(args) == 1:
+            for repo in self.repos_data['repos']:
+                thread = Thread(target=target, args=(repo,))
+                thread.start()
+                threads.append(thread)
 
         for thread in threads:
             thread.join()
