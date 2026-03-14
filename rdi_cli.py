@@ -10,6 +10,7 @@ print(argparse.__version__)
 print(pygit2.__version__)
 print(setuptools.__version__)
 
+
 def main():
     rdi_vcs = RdiVcs('meta_repo/repos.yaml')
     # TODO: add meta-repo path as optional arg
