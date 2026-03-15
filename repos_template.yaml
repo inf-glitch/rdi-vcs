@@ -1,0 +1,20 @@
+repos:
+  - name: repo_1
+    type: git
+    url: 
+    version: main
+
+  - name: repo_2
+    type: git
+    url: 
+    version: develop
+
+  - name: repo_3
+    type: git
+    url: 
+    version: stable
+
+  - name: repo_4
+    type: git
+    url: 
+    version: release
