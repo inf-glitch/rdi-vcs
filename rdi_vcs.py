@@ -66,7 +66,8 @@ class RdiVcs:
         print(f'Cloning {name} from {url} to {clone_path}...')
 
         try:
-            clone_repository(url, clone_path, callbacks=self.SshKeyCallbacks())
+            # TODO: process both url types via separate parameter
+            clone_repository(url, clone_path) #, callbacks=self.SshKeyCallbacks())
             print(f'Done cloning {name}')
         except Exception as e:
             print(f'Error cloning {name}: {e}')
@@ -130,8 +131,33 @@ class RdiVcs:
         #     return
 
         try:
+            repo_obj = pygit2.Repository(repo_path)
+            remote = repo_obj.remotes['origin']
+            remote_url = remote.url
+
+            token = os.environ.get('GITHUB_TOKEN')
+            if not token:
+                print(
+                    'GITHUB_TOKEN environment variable not set.\n'
+                    'Create a token at: https://github.com/settings/tokens\n'
+                    'And set it to current shell session: export GITHUB_TOKEN=*your_token*\n'
+                    'Or execute: echo export GITHUB_TOKEN=*your_token* >> ~/.zshrc\n'
+                    'to add it to your shell configuration\n'
+                    '====================================================================='
+                )
+
+            use_token = token and remote_url.startswith('https://')
+
+            cmd = ['git', 'push', '-u', 'origin', 'HEAD']
+
+            if use_token:
+                url_parts = remote_url.split('://', 1)
+                authed_url = f'{url_parts[0]}://{token}@{url_parts[1]}'
+                cmd = ['git', 'push', authed_url]
+                print(f'Using token auth for {name}')
+
             result = subprocess.run(
-                ['git', 'push', '-u', 'origin', 'HEAD'],
+                cmd,
                 cwd=repo_path,
                 capture_output=True,
                 text=True,
@@ -162,8 +188,33 @@ class RdiVcs:
             return
 
         try:
+            repo_obj = pygit2.Repository(repo_path)
+            remote = repo_obj.remotes['origin']
+            remote_url = remote.url
+
+            token = os.environ.get('GITHUB_TOKEN')
+            if not token:
+                print(
+                    'GITHUB_TOKEN environment variable not set.\n'
+                    'Create a token at: https://github.com/settings/tokens\n'
+                    'And set it to current shell session: export GITHUB_TOKEN=*your_token*\n'
+                    'Or execute: echo export GITHUB_TOKEN=*your_token* >> ~/.zshrc\n'
+                    'to add it to your shell configuration\n'
+                    '====================================================================='
+                )
+
+            use_token = token and remote_url.startswith('https://')
+
+            cmd = ['git', 'pull']
+
+            if use_token:
+                url_parts = remote_url.split('://', 1)
+                authed_url = f'{url_parts[0]}://{token}@{url_parts[1]}'
+                cmd = ['git', 'pull', authed_url]
+                print(f'Using token auth for {name}')
+
             result = subprocess.run(
-                ['git', 'pull'],
+                cmd,
                 cwd=repo_path,
                 capture_output=True,
                 text=True,
