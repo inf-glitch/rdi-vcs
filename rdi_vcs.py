@@ -241,12 +241,17 @@ class RdiVcs:
                 mr_data = r.json()
                 html_url = mr_data['html_url']
                 print(f'Repository: {name} -> {html_url}')
+                return
             elif r.status_code == 422:
                 error_msg = r.json().get('message', '')
                 if 'pull request already exists' in error_msg:
-                    print(f'Pull request already exists for {name} from branch u"{current_branch}"')
+                    print(f'Pull request already exists for {name} from branch "{current_branch}"')
+                    return
             else:
                 print(f'Failed to create MR for {name}: {r.status_code} - {r.text}')
+                return
+
+            print(f'Nothing to merge for {name} on {current_branch}')
 
         except Exception as e:
             print(f'Error publishing {name}: {e}')

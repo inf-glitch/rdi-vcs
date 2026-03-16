@@ -2,20 +2,33 @@
 
 #! /usr/bin/bash
 
-if [ $(echo $SHELL) = "/usr/bin/bash" ]; then
-    echo "export PATH=$PATH:~/.local/" >> ~/.bashrc
+# if [ $(echo $SHELL) = "/usr/bin/bash" ]; then
+#     echo "export PATH=$PATH:~/.local/" >> ~/.bashrc
+# 
+# else if [ $(echo $SHELL) = "/usr/bin/zsh" ]; then
+#     echo "export PATH=$PATH:~/.local/" >> ~/.zshrc
+#     echo ""
+#     echo $PATH
+#     echo ""
+# 
+# else
+#     echo "unsupported shell: $SHELL"
+#     exit 1
+# fi
+# fi
 
-else if [ $(echo $SHELL) = "/usr/bin/zsh" ]; then
-    echo "export PATH=$PATH:~/.local/" >> ~/.zshrc
-    echo ""
-    echo $PATH
-    echo ""
-
-else
-    echo "unsupported shell: $SHELL"
-    exit 1
-fi
-fi
+case $SHELL in
+    */bash)
+        echo "export PATH=\$PATH:~/.local/" >> ~/.bashrc
+        ;;
+    */zsh)
+        echo "export PATH=\$PATH:~/.local" >> ~/.zshrc
+        ;;
+    *)
+        echo "unsupported shell: $SHELL"
+        exit 1
+        ;;
+esac
 
 # ------------------------------------------------------
 
@@ -55,5 +68,3 @@ echo "====================================================="
 echo "rdi-vcs installed. reload the shell to apply changes."
 echo "current $SHRC saved to $SHRC.pre-rdi-vcs"
 echo "====================================================="
-
-
