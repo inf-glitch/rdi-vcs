@@ -1,0 +1,20 @@
+repos:
+  - name: repo_1
+    type: git
+    url: https://github.com/inf-glitch/repo_1.git
+    version: main
+
+  - name: repo_2
+    type: git
+    url: https://github.com/inf-glitch/repo_2.git
+    version: develop
+
+  - name: repo_3
+    type: git
+    url: https://github.com/inf-glitch/repo_3.git
+    version: stable
+
+  - name: repo_4
+    type: git
+    url: https://github.com/inf-glitch/repo_4.git
+    version: release

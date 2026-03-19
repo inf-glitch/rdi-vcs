@@ -12,7 +12,6 @@ import pygit2
 import requests
 from pygit2 import clone_repository, RemoteCallbacks
 import yaml
-from getpass import getuser
 from threading import Thread
 import subprocess
 import os
@@ -20,15 +19,26 @@ import os
 
 class RdiVcs:
 
-    class SshKeyCallbacks(RemoteCallbacks):
+    class TokenCallbacks(RemoteCallbacks):
+
+        def __init__(self, token: str):
+            self._token = token
 
         def credentials(self, url, username, allowed_types):
-            return pygit2.Keypair(
-                username,
-                '/home/' + getuser() + '/.ssh/git.pub',
-                '/home/' + getuser() + '/.ssh/git',
-                ''
-            )
+            # GitHub accepts x-access-token as the username for HTTPS token auth.
+            return pygit2.UserPass("x-access-token", self._token)
+
+    def _is_ssh_github_url(self, url: str) -> bool:
+        return url.startswith("git@github.com:")
+
+    def _is_https_github_url(self, url: str) -> bool:
+        return url.startswith("https://github.com/")
+
+    def _get_token_callbacks(self):
+        token = os.environ.get("GITHUB_TOKEN")
+        if not token:
+            return None
+        return self.TokenCallbacks(token)
             
     def _get_github_repo_info(self, url):
         # parsing a name also as overhead to handle
@@ -51,12 +61,25 @@ class RdiVcs:
     def __init__(self, repos_config):
         print('got config:', repos_config, '\n')
         
-        with open(repos_config, 'r') as f:
-            self.repos_data = yaml.safe_load(f)
+        try:
+            with open(repos_config, 'r') as f:
+                self.repos_data = yaml.safe_load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                f'Config file not found: {repos_config}\n'
+                'Tip: pass a config path via --config'
+            )
 
     def clone(self, repo):
         name = repo['name']    
         url = repo['url']
+
+        if self._is_ssh_github_url(url):
+            print(
+                f'{name} uses SSH URL ({url}). SSH auth is not supported.\n'
+                'Please change the repo URL to HTTPS (https://github.com/owner/repo.git).'
+            )
+            return
 
         clone_path = os.path.abspath(f'{name}')
         if os.path.exists(clone_path):
@@ -66,8 +89,11 @@ class RdiVcs:
         print(f'Cloning {name} from {url} to {clone_path}...')
 
         try:
-            # TODO: process both url types via separate parameter
-            clone_repository(url, clone_path) #, callbacks=self.SshKeyCallbacks())
+            callbacks = self._get_token_callbacks()
+            if callbacks:
+                clone_repository(url, clone_path, callbacks=callbacks)
+            else:
+                clone_repository(url, clone_path)
             print(f'Done cloning {name}')
         except Exception as e:
             print(f'Error cloning {name}: {e}')
@@ -86,8 +112,18 @@ class RdiVcs:
             return
         try:
             remote = repo_obj.remotes['origin']
-            callbacks = self.SshKeyCallbacks()
-            remote.fetch(callbacks=callbacks)
+            if self._is_ssh_github_url(remote.url):
+                print(
+                    f'{name} origin remote uses SSH URL ({remote.url}). SSH auth is not supported.\n'
+                    'Please change the remote URL to HTTPS (https://github.com/owner/repo.git).'
+                )
+                return
+
+            callbacks = self._get_token_callbacks()
+            if callbacks:
+                remote.fetch(callbacks=callbacks)
+            else:
+                remote.fetch()
         except Exception as e:
             print(f'Fetch failed for {name}: {e}')
 
@@ -231,7 +267,7 @@ class RdiVcs:
                 elif result.stdout:
                     print(result.stdout)
 
-        except subprocess.TimoutExpired:
+        except subprocess.TimeoutExpired:
             print(f'Pull timed out for {name}')
 
         except Exception as e:
