@@ -10,10 +10,14 @@ sudo chmod +x install.sh
 The tool will now be available through rdi-vcs command
 
 ## Usage
-After installation, first configure the repos file location:
+Configuration lookup order:
 
-**rdi-vcs** `set-config /path/to/repos.yaml` - saves the location of your repos config  
-**rdi-vcs** `--config /path/to/repos.yaml` *clone* - set the config location explicitly (overrides the location of config if one was set via 'set-config')    
+1. `--config /path/to/repos.yaml` (overrides everything)
+2. `RDI_VCS_CONFIG_LOCATION` (set by `rdi-vcs set-config ...`)
+3. `./repos.yaml` in the current working directory
+
+**rdi-vcs** *set-config* /path/to/repos.yaml - saves the location of your repos config and allows not to specify path afterwards  
+to reset the config location just pass "reset" to set-config command: **rdi-vcs** *set-config* reset  
 **rdi-vcs** *checkout-create* *\*your_branch_name\** - checkouts all the configured repos to the specified branch or creates & checkouts it the branch does not exist  
 **rdi-vcs** *push* - pushes your **staged** local changes to all repos to the branch the are currently in  
 **rdi-vcs** *pull* - pulls to all repos  

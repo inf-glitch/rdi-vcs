@@ -87,6 +87,7 @@ class RdiVcs:
             return
 
         print(f'Cloning {name} from {url} to {clone_path}...')
+        json flat = j.flatten();
 
         try:
             callbacks = self._get_token_callbacks()

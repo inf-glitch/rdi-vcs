@@ -40,12 +40,8 @@ def _resolve_config_path(arg_value: str) -> str:
     env_value = os.environ.get("RDI_VCS_CONFIG_LOCATION")
     if env_value:
         return env_value
-    raise SystemExit(
-        "No config path provided.\n"
-        "Either:\n"
-        "  - run: rdi-vcs set-config /path/to/repos.yaml\n"
-        "  - or pass --config /path/to/repos.yaml explicitly\n"
-    )
+    # Default config: repos.yaml from current working directory.
+    return os.path.abspath("repos.yaml")
 
 
 def main():
@@ -83,8 +79,12 @@ def main():
         print(pygit2.__version__)
         print(setuptools.__version__)
 
-
     if args.command == "set-config":
+        if args.path == "reset":
+            _persist_config_location("")
+            print('Config location has been reset to: $PWD/repos.yaml')
+            return
+
         _persist_config_location(args.path)
         print(f'Persisted RDI_VCS_CONFIG_LOCATION to: {args.path}')
         return
