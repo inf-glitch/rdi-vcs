@@ -294,8 +294,7 @@ class RdiVcs:
             )
             return
 
-        try:
-            repo_obj = pygit2.Repository(repo_path)
+        try: repo_obj = pygit2.Repository(repo_path)
             current_branch = repo_obj.head.shorthand
             print(f'Current branch is "{current_branch}"')
 
@@ -344,14 +343,66 @@ class RdiVcs:
         except Exception as e:
             print(f'Error publishing {name}: {e}')
 
+    def commit(self, repo, message):
+        name = repo['name']
+        repo_path = os.path.abspath(name)
+        if not os.path.exists(repo_path):
+            print(f'Repository {name} not found at {repo_path}. Cannot commit.')
+            return
+
+        try:
+            add_result = subprocess.run(
+                ['git', 'add', '-A'],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            if add_result.returncode != 0:
+                print(f'Failed to stage changes for {name} (exit code {add_result.returncode})')
+                if add_result.stderr:
+                    print(add_result.stderr)
+                elif add_result.stdout:
+                    print(add_result.stdout)
+                return
+
+            commit_result = subprocess.run(
+                ['git', 'commit', '-m', message],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            if commit_result.returncode == 0:
+                print(f'Committed {name} successfully')
+                if commit_result.stdout:
+                    print(commit_result.stdout)
+                return
+
+            combined_output = f'{commit_result.stdout}\n{commit_result.stderr}'.lower()
+            if 'nothing to commit' in combined_output or 'no changes added to commit' in combined_output:
+                print(f'No changes to commit for {name}')
+                return
+
+            print(f'Commit failed for {name} (exit code {commit_result.returncode})')
+            if commit_result.stderr:
+                print(commit_result.stderr)
+            elif commit_result.stdout:
+                print(commit_result.stdout)
+
+        except subprocess.TimeoutExpired:
+            print(f'Commit timed out for {name}')
+        except Exception as e:
+            print(f'Error committing {name}: {e}')
+
     def execute_threads(self, *args):
         target = args[0]
         threads = []
 
         if len(args) == 2:
-            branch = args[1]
+            extra_arg = args[1]  # <branch> / <message>
             for repo in self.repos_data['repos']:
-                thread = Thread(target=target, args=(repo, branch))
+                thread = Thread(target=target, args=(repo, extra_arg))
                 thread.start()
                 threads.append(thread)
 

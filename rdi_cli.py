@@ -5,6 +5,7 @@ import vcstool
 import pygit2  # temp
 import setuptools
 import os
+from datetime import datetime
 from pathlib import Path
 
 
@@ -71,6 +72,13 @@ def main():
     push_parser = subparsers.add_parser("push")
     pull_parser = subparsers.add_parser("pull")
     publish_parser = subparsers.add_parser("publish")
+    commit_parser = subparsers.add_parser("commit")
+    commit_parser.add_argument(
+        "-m",
+        "--message",
+        default=None,
+        help="Commit message used for all configured repositories",
+    )
 
     args = parser.parse_args()
 
@@ -107,6 +115,12 @@ def main():
 
         case "publish":
             rdi_vcs.execute_threads(rdi_vcs.publish)
+
+        case "commit":
+            commit_message = args.message
+            if not commit_message:
+                commit_message = datetime.now().strftime("rdi-vcs commit %Y-%m-%d %H:%M:%S")
+            rdi_vcs.execute_threads(rdi_vcs.commit, commit_message)
 
 
 if __name__ == '__main__':
