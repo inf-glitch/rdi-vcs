@@ -11,6 +11,7 @@ from pathlib import Path
 
 def _persist_config_location(path: str) -> None:
     env_path = Path.home() / ".env.sh"
+    path = os.path.abspath(path)
     export_line = f'export RDI_VCS_CONFIG_LOCATION="{path}"'
 
     existing = ""
