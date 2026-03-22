@@ -7,14 +7,14 @@
 #       - name:
 #         ...
 
+import os
+import subprocess
+from threading import Thread
 
 import pygit2
 import requests
-from pygit2 import clone_repository, RemoteCallbacks
 import yaml
-from threading import Thread
-import subprocess
-import os
+from pygit2 import RemoteCallbacks, clone_repository
 
 
 class RdiVcs:
@@ -24,7 +24,7 @@ class RdiVcs:
         def __init__(self, token: str):
             self._token = token
 
-        def credentials(self, url, username, allowed_types):
+        def credentials(self, _url, _username, _allowed_types):
             # GitHub accepts x-access-token as the username for HTTPS token auth.
             return pygit2.UserPass("x-access-token", self._token)
 
@@ -39,7 +39,7 @@ class RdiVcs:
         if not token:
             return None
         return self.TokenCallbacks(token)
-            
+
     def _get_github_repo_info(self, url):
         # parsing a name also as overhead to handle
         # difference in local dir name if present
@@ -62,7 +62,7 @@ class RdiVcs:
         try:
             with open(repos_config, 'r') as f:
                 self.repos_data = yaml.safe_load(f)
-                print('got congig:', repos_config, '\n')
+                print('got config:', repos_config, '\n')
         except FileNotFoundError:
             raise FileNotFoundError(
                 f'Config file not found: {repos_config}\n'
@@ -71,7 +71,7 @@ class RdiVcs:
             )
 
     def clone(self, repo):
-        name = repo['name']    
+        name = repo['name']
         url = repo['url']
 
         if self._is_ssh_github_url(url):
@@ -156,7 +156,6 @@ class RdiVcs:
 
     def push(self, repo):
         name = repo['name']
-        vcs_type = repo['type'] 
         repo_path = os.path.abspath(name)
         if not os.path.exists(repo_path):
             print(f'Repository {name} not found at {repo_path}. Cannot push.')
@@ -309,10 +308,12 @@ class RdiVcs:
 
             repo_info_url = f'https://api.github.com/repos/{owner}/{repo_name}'
             r = requests.get(repo_info_url, headers=headers)
-            
+
             if r.status_code != 200:
-                print(f'Failed to get repository info for {name}: {r.status_code} - \
-                        {r.text}')
+                print(
+                    f'Failed to get repository info for {name}: '
+                    f'{r.status_code} - {r.text}'
+                )
 
             default_branch = r.json()['default_branch']
 
@@ -379,8 +380,13 @@ class RdiVcs:
                     print(commit_result.stdout)
                 return
 
-            combined_output = f'{commit_result.stdout}\n{commit_result.stderr}'.lower()
-            if 'nothing to commit' in combined_output or 'no changes added to commit' in combined_output:
+            combined_output = (
+                f'{commit_result.stdout}\n{commit_result.stderr}'
+            ).lower()
+            if (
+                'nothing to commit' in combined_output
+                or 'no changes added to commit' in combined_output
+            ):
                 print(f'No changes to commit for {name}')
                 return
 

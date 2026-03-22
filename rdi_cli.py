@@ -1,12 +1,13 @@
-from rdi_vcs import RdiVcs
-
 import argparse
-import vcstool
-import pygit2  # temp
-import setuptools
 import os
 from datetime import datetime
 from pathlib import Path
+
+import pygit2  # temp
+import setuptools
+import vcstool
+
+from rdi_vcs import RdiVcs
 
 
 def _persist_config_location(path: str) -> None:
@@ -67,12 +68,12 @@ def main():
     set_config_parser = subparsers.add_parser("set-config")
     set_config_parser.add_argument("path", help="Config path to persist")
 
-    clone_parser = subparsers.add_parser("clone")
+    subparsers.add_parser("clone")
     checkout_create_parser = subparsers.add_parser("checkout-create")
     checkout_create_parser.add_argument("branch")
-    push_parser = subparsers.add_parser("push")
-    pull_parser = subparsers.add_parser("pull")
-    publish_parser = subparsers.add_parser("publish")
+    subparsers.add_parser("push")
+    subparsers.add_parser("pull")
+    subparsers.add_parser("publish")
     commit_parser = subparsers.add_parser("commit")
     commit_parser.add_argument(
         "-m",
@@ -80,7 +81,10 @@ def main():
         nargs="+",
         metavar="WORD",
         default=None,
-        help="Commit message used for all configured repositories",
+        help=(
+            "Commit message for all configured repos "
+            "(quote the message or pass multiple words after -m)"
+        ),
     )
 
     args = parser.parse_args()
@@ -124,10 +128,11 @@ def main():
             if commit_message:
                 commit_message = " ".join(commit_message)
             if not commit_message:
-                commit_message = datetime.now().strftime("rdi-vcs commit %Y-%m-%d %H:%M:%S")
+                commit_message = datetime.now().strftime(
+                    "rdi-vcs commit %Y-%m-%d %H:%M:%S"
+                )
             rdi_vcs.execute_threads(rdi_vcs.commit, commit_message)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
