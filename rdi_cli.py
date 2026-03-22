@@ -77,6 +77,8 @@ def main():
     commit_parser.add_argument(
         "-m",
         "--message",
+        nargs="+",
+        metavar="WORD",
         default=None,
         help="Commit message used for all configured repositories",
     )
@@ -119,6 +121,8 @@ def main():
 
         case "commit":
             commit_message = args.message
+            if commit_message:
+                commit_message = " ".join(commit_message)
             if not commit_message:
                 commit_message = datetime.now().strftime("rdi-vcs commit %Y-%m-%d %H:%M:%S")
             rdi_vcs.execute_threads(rdi_vcs.commit, commit_message)

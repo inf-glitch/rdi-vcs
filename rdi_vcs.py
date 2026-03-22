@@ -59,15 +59,15 @@ class RdiVcs:
         return parts[0], parts[1]
 
     def __init__(self, repos_config):
-        print('got config:', repos_config, '\n')
-        
         try:
             with open(repos_config, 'r') as f:
                 self.repos_data = yaml.safe_load(f)
+                print('got congig:', repos_config, '\n')
         except FileNotFoundError:
             raise FileNotFoundError(
                 f'Config file not found: {repos_config}\n'
-                'Tip: pass a config path via --config'
+                'Tip: pass a config path via --config\n'
+                'or set it permanently via set-config command'
             )
 
     def clone(self, repo):
