@@ -52,8 +52,24 @@ Message format: "rdi-vcs commit %Y-%m-%d %H:%M:%S"
 
 ## Uninstallation
 
-Uninstall the venv & wrappers:
-(will be through uninstall.sh soon)
+From the clone directory (or anywhere if `~/.env.sh` still lists `RDI_VCS_INSTALLATION`):
+
+```bash
+cd rdi-vcs
+chmod +x uninstall.sh
+./uninstall.sh
+```
+
+This removes the Miniforge tree and downloaded installer under the install directory, the `rdi-vcs` conda environment (inside Miniforge), the `~/.local/rdi-vcs` launcher, the entire `~/.env.sh` file (installer and `rdi-vcs set-config` use this path), and the `export PATH=...~/.local` line added to `~/.bashrc` / `~/.zshrc` by `install.sh`.
+
+Options:
+
+- `./uninstall.sh --dry-run` — show what would be removed
+- `./uninstall.sh -y` — skip the confirmation prompt (required if stdin is not a tty)
+- `./uninstall.sh --install-dir /path/to/rdi-vcs` — if `~/.env.sh` is missing or wrong
+- `./uninstall.sh --remove-rc-backups` — also delete `~/.bashrc.pre-rdi-vcs` and `~/.zshrc.pre-rdi-vcs` from the installer
+
+Manual one-liner (equivalent core steps):
 
 ```bash
 rm ~/.local/rdi-vcs
