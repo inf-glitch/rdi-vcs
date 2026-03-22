@@ -294,7 +294,8 @@ class RdiVcs:
             )
             return
 
-        try: repo_obj = pygit2.Repository(repo_path)
+        try:
+            repo_obj = pygit2.Repository(repo_path)
             current_branch = repo_obj.head.shorthand
             print(f'Current branch is "{current_branch}"')
 
